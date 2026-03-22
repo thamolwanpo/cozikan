@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cozikan — Game Dev Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍜</text></svg>">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --cream-dark: #EDE6D6;
+    --parchment: #E8DFCC;
+    --bark: #8B6F47;
+    --bark-light: #A68B5B;
+    --bark-dark: #5C4527;
+    --moss: #5A7A4A;
+    --rust: #B85C38;
+    --amber: #C9922A;
+    --amber-light: #E0B050;
+    --plum: #7A4A72;
+    --sky: #4A7A8A;
+    --ink: #2C1F0E;
+    --ink-muted: #5C4A30;
+    --ink-faint: #9B8870;
+    --shadow: rgba(92, 69, 39, 0.12);
+    --shadow-md: rgba(92, 69, 39, 0.2);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(201,146,42,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(90,122,74,0.08) 0%, transparent 50%);
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--bark-dark);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    box-shadow: 0 2px 8px var(--shadow-md);
+  }
+
+  .header-left { display: flex; align-items: center; gap: 20px; }
+
+  .logo {
+    font-family: 'Lora', serif;
+    color: var(--cream);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: var(--amber-light);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  /* NAV TABS */
+  .nav-tabs {
+    display: flex;
+    gap: 2px;
+  }
+
+  .nav-tab {
+    color: rgba(245,240,232,0.55);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .nav-tab:hover { color: var(--cream); background: rgba(255,255,255,0.08); }
+  .nav-tab.active { color: var(--cream); background: rgba(255,255,255,0.15); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .milestone-select {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--cream);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .milestone-select option { background: var(--bark-dark); color: var(--cream); }
+
+  .btn-add-milestone {
+    background: var(--amber);
+    border: none;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-add-milestone:hover { background: var(--amber-light); }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    gap: 20px;
+    padding: 10px 1.5rem;
+    background: var(--cream-dark);
+    border-bottom: 1px solid var(--parchment);
+    font-size: 12px;
+    color: var(--ink-muted);
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .stat { display: flex; align-items: center; gap: 5px; }
+  .stat-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: var(--ink-faint);
+    text-align: center;
+    gap: 8px;
+  }
+
+  .empty-state-icon { font-size: 36px; margin-bottom: 4px; }
+  .empty-state h3 { font-family: 'Lora', serif; font-size: 15px; color: var(--ink-muted); font-weight: 500; }
+  .empty-state p { font-size: 13px; line-height: 1.5; max-width: 200px; }
+
+  /* MAIN BOARD */
+  .main {
+    padding: 1.5rem 1.5rem 2rem;
+    overflow-x: auto;
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(280px, 1fr));
+    gap: 16px;
+    min-width: 1120px;
+  }
+
+  /* COLUMN */
+  .column {
+    background: var(--cream-dark);
+    border-radius: 12px;
+    border: 1px solid var(--parchment);
+    display: flex;
+    flex-direction: column;
+    min-height: 600px;
+  }
+
+  .col-header {
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--parchment);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .col-title-row { display: flex; align-items: center; gap: 8px; }
+
+  .col-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  .col-title { font-family: 'Lora', serif; font-size: 14px; font-weight: 600; color: var(--ink); }
+
+  .col-count {
+    background: var(--parchment);
+    color: var(--ink-muted);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 10px;
+  }
+
+  .btn-col-add {
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .btn-col-add:hover { color: var(--bark); background: var(--parchment); }
+
+  .col-body {
+    padding: 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* CARD */
+  .card {
+    background: #FDFAF4;
+    border: 1px solid var(--parchment);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.1s;
+    position: relative;
+  }
+
+  .card:hover { box-shadow: 0 4px 14px var(--shadow-md); transform: translateY(-1px); }
+  .card.dragging { opacity: 0.5; box-shadow: 0 8px 24px var(--shadow-md); }
+  .col-body.drag-over { background: rgba(201,146,42,0.06); border-radius: 8px; }
+
+  .card-priority-bar {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 10px 0 0 10px;
+  }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .card-title { font-family: 'Lora', serif; font-size: 13.5px; font-weight: 500; color: var(--ink); line-height: 1.4; flex: 1; }
+  .card-note { font-size: 12px; color: var(--ink-muted); line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .card-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+  .card-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+
+  .tag { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .tag-art     { background: #F5E6D3; color: #7A4820; }
+  .tag-code    { background: #D3E4F5; color: #1E4D7A; }
+  .tag-audio   { background: #E8D3F5; color: #5A207A; }
+  .tag-design  { background: #D3F5E4; color: #1A6640; }
+  .tag-writing { background: #F5D3D3; color: #7A1E1E; }
+
+  .priority-badge { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 8px; }
+  .priority-high   { background: #F5E0D3; color: #8B3A1A; }
+  .priority-medium { background: #F5F0D3; color: #7A6010; }
+  .priority-low    { background: #E0F5D3; color: #2A6B1A; }
+
+  .card-milestone { font-size: 10px; color: var(--ink-faint); display: flex; align-items: center; gap: 3px; margin-bottom: 4px; }
+
+  /* ADD FORM */
+  .add-card-form {
+    background: #FDFAF4;
+    border: 1.5px dashed var(--parchment);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .add-card-form.visible { display: flex; }
+
+  .add-card-form input, .add-card-form textarea, .add-card-form select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    border: 1px solid var(--parchment);
+    border-radius: 6px;
+    padding: 7px 10px;
+    background: var(--cream);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+    resize: none;
+  }
+  .add-card-form input:focus, .add-card-form textarea:focus, .add-card-form select:focus { border-color: var(--bark-light); }
+
+  .add-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .tag-checkboxes { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag-check { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+  .tag-check input { width: auto; }
+  .tag-check span { font-size: 11px; color: var(--ink-muted); }
+
+  .form-actions { display: flex; gap: 8px; }
+
+  .btn-save {
+    background: var(--bark); color: white; border: none; border-radius: 6px;
+    padding: 7px 16px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-save:hover { background: var(--bark-dark); }
+
+  .btn-cancel {
+    background: none; border: 1px solid var(--parchment); border-radius: 6px;
+    padding: 7px 12px; font-family: 'DM Sans', sans-serif; font-size: 13px;
+    color: var(--ink-muted); cursor: pointer; transition: background 0.15s;
+  }
+  .btn-cancel:hover { background: var(--parchment); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(44, 31, 14, 0.45);
+    display: none; align-items: center; justify-content: center;
+    z-index: 100; padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: #FDFAF4; border-radius: 14px; border: 1px solid var(--parchment);
+    width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(44,31,14,0.3);
+  }
+
+  .modal-header {
+    padding: 20px 24px 16px; border-bottom: 1px solid var(--parchment);
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  }
+
+  .modal-title-input {
+    font-family: 'Lora', serif; font-size: 18px; font-weight: 500;
+    border: none; background: none; color: var(--ink); width: 100%; outline: none; line-height: 1.3;
+  }
+
+  .modal-close {
+    background: none; border: none; color: var(--ink-faint);
+    font-size: 20px; cursor: pointer; padding: 0; line-height: 1; flex-shrink: 0;
+  }
+  .modal-close:hover { color: var(--ink); }
+
+  .modal-body { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+  .modal-field label {
+    display: block; font-size: 11px; font-weight: 500; color: var(--ink-faint);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px;
+  }
+
+  .modal-field textarea {
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    border: 1px solid var(--parchment); border-radius: 8px; padding: 10px 12px;
+    background: var(--cream); color: var(--ink); width: 100%; resize: vertical;
+    outline: none; min-height: 90px; line-height: 1.6; transition: border-color 0.15s;
+  }
+  .modal-field textarea:focus { border-color: var(--bark-light); }
+
+  .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .modal-field select {
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    border: 1px solid var(--parchment); border-radius: 8px; padding: 9px 12px;
+    background: var(--cream); color: var(--ink); width: 100%; outline: none; cursor: pointer;
+  }
+
+  .modal-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .modal-tag-toggle {
+    padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 500;
+    cursor: pointer; border: 1.5px solid transparent; transition: all 0.15s; opacity: 0.5;
+  }
+  .modal-tag-toggle.active { opacity: 1; }
+  .modal-tag-toggle:hover { opacity: 0.8; }
+
+  .modal-footer {
+    padding: 0 24px 20px; display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .btn-delete {
+    background: none; border: 1px solid #F5D3D3; border-radius: 6px;
+    padding: 8px 14px; font-family: 'DM Sans', sans-serif; font-size: 13px;
+    color: var(--rust); cursor: pointer; transition: all 0.15s;
+  }
+  .btn-delete:hover { background: #FDF0ED; }
+
+  .btn-save-modal {
+    background: var(--bark); color: white; border: none; border-radius: 8px;
+    padding: 9px 22px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-save-modal:hover { background: var(--bark-dark); }
+
+  /* ── EXAMPLE PAGE ── */
+  .example-page {
+    padding: 2rem 2rem 3rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .example-hero {
+    text-align: center;
+    padding: 2.5rem 1rem 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .example-hero-icon { font-size: 40px; margin-bottom: 12px; }
+
+  .example-hero h2 {
+    font-family: 'Lora', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .example-hero p {
+    font-size: 14px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .example-section { margin-bottom: 2.5rem; }
+
+  .example-section-title {
+    font-family: 'Lora', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .example-section-sub {
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-bottom: 14px;
+  }
+
+  .example-cols {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    min-width: 800px;
+    overflow-x: auto;
+  }
+
+  .example-col {
+    background: var(--cream-dark);
+    border-radius: 10px;
+    border: 1px solid var(--parchment);
+    overflow: hidden;
+  }
+
+  .example-col-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--parchment);
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .example-col-title { font-family: 'Lora', serif; font-size: 13px; font-weight: 600; color: var(--ink); }
+
+  .example-col-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+
+  .example-card {
+    background: #FDFAF4;
+    border: 1px solid var(--parchment);
+    border-radius: 8px;
+    padding: 10px 12px;
+    position: relative;
+  }
+
+  .example-card-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 8px 0 0 8px; }
+  .example-card-title { font-family: 'Lora', serif; font-size: 12.5px; font-weight: 500; color: var(--ink); margin-bottom: 6px; line-height: 1.3; }
+  .example-card-note { font-size: 11px; color: var(--ink-muted); margin-bottom: 8px; line-height: 1.4; }
+  .example-card-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
+
+  .example-milestone-row {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1.5rem;
+  }
+
+  .example-milestone-pill {
+    background: var(--cream-dark);
+    border: 1px solid var(--parchment);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 13px;
+    color: var(--ink-muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .example-milestone-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  .example-tip {
+    background: #FEF8EC;
+    border: 1px solid #F0D89A;
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .example-tip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .example-tip-text { font-size: 13px; color: var(--ink-muted); line-height: 1.5; }
+  .example-tip-text strong { color: var(--ink); font-weight: 500; }
+
+  .example-divider {
+    border: none; border-top: 1px solid var(--parchment); margin: 2rem 0;
+  }
+
+  .btn-go-board {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bark); color: white; border: none; border-radius: 8px;
+    padding: 10px 22px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background 0.15s; text-decoration: none;
+  }
+  .btn-go-board:hover { background: var(--bark-dark); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo">
+      <div class="logo-icon">🍜</div>
+      Cozikan
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-tab active" onclick="switchPage('board')">Board</button>
+      <button class="nav-tab" onclick="switchPage('example')">Example</button>
+    </nav>
+  </div>
+  <div class="header-right" id="boardControls">
+    <select class="milestone-select" id="milestoneFilter" onchange="filterByMilestone()">
+      <option value="">All milestones</option>
+    </select>
+    <button class="btn-add-milestone" onclick="openMilestoneModal()">+ Milestone</button>
+  </div>
+</header>
+
+<!-- BOARD PAGE -->
+<div class="page active" id="page-board">
+  <div class="stats-bar" id="statsBar"></div>
+  <main class="main">
+    <div class="board" id="board"></div>
+  </main>
+</div>
+
+<!-- EXAMPLE PAGE -->
+<div class="page" id="page-example">
+  <div class="example-page">
+
+    <div class="example-hero">
+      <div class="example-hero-icon">🍜</div>
+      <h2>How to use Cozikan</h2>
+      <p>A cozy kanban board built for indie game devs. Here's a walkthrough of all the features using a made-up platformer project.</p>
+    </div>
+
+    <!-- TIPS -->
+    <div class="example-section">
+      <div class="example-tip">
+        <span class="example-tip-icon">📌</span>
+        <span class="example-tip-text"><strong>Cards move between columns</strong> — drag a card from one column to another as your task progresses, or click to open it and change the status.</span>
+      </div>
+      <div class="example-tip">
+        <span class="example-tip-icon">🏷️</span>
+        <span class="example-tip-text"><strong>Tags keep things organised</strong> — use Art, Code, Audio, Design, and Writing to filter visually at a glance. One card can have multiple tags.</span>
+      </div>
+      <div class="example-tip">
+        <span class="example-tip-icon">🔖</span>
+        <span class="example-tip-text"><strong>Milestones = sprints</strong> — create milestones like "Alpha Build" or "Demo Build" and assign tasks to them. Use the header filter to focus on one milestone at a time.</span>
+      </div>
+      <div class="example-tip">
+        <span class="example-tip-icon">🔴</span>
+        <span class="example-tip-text"><strong>Priority bar</strong> — the thin coloured stripe on the left of each card shows priority. Red = high, amber = medium, green = low.</span>
+      </div>
+    </div>
+
+    <hr class="example-divider">
+
+    <!-- MILESTONE EXAMPLE -->
+    <div class="example-section">
+      <div class="example-section-title">Milestones (sprints)</div>
+      <div class="example-section-sub">Create milestones in the top right and assign each card to one.</div>
+      <div class="example-milestone-row">
+        <div class="example-milestone-pill"><div class="example-milestone-dot" style="background:#B85C38"></div>Pre-Alpha</div>
+        <div class="example-milestone-pill"><div class="example-milestone-dot" style="background:#C9922A"></div>Alpha Build</div>
+        <div class="example-milestone-pill"><div class="example-milestone-dot" style="background:#4A7A8A"></div>Beta</div>
+        <div class="example-milestone-pill"><div class="example-milestone-dot" style="background:#5A7A4A"></div>Launch</div>
+      </div>
+    </div>
+
+    <hr class="example-divider">
+
+    <!-- BOARD EXAMPLE -->
+    <div class="example-section">
+      <div class="example-section-title">Example board — "Meadow Run" platformer</div>
+      <div class="example-section-sub">This is what a real board might look like mid-development.</div>
+
+      <div style="overflow-x:auto;">
+      <div class="example-cols">
+
+        <!-- Backlog -->
+        <div class="example-col">
+          <div class="example-col-header">
+            <div class="col-dot" style="background:#C9922A"></div>
+            <span class="example-col-title">Backlog / Ideas</span>
+          </div>
+          <div class="example-col-body">
+            <div class="example-card">
+              <div class="example-card-bar" style="background:#C9922A"></div>
+              <div class="example-card-title">Design pause menu UI</div>
+              <div class="example-card-note">Resume, settings, quit. Keep it cozy — maybe use a campfire animation.</div>
+              <div class="example-card-footer">
+                <div class="card-tags"><span class="tag tag-design">Design</span><span class="tag tag-art">Art</span></div>
+                <span class="priority-badge priority-medium">medium</span>
+              </div>
+            </div>
+            <div class="example-card">
+              <div class="example-card-bar" style="background:#C9922A"></div>
+              <div class="example-card-title">Write NPC dialogue — village elder</div>
+              <div class="example-card-note">3 unique lines, hints at the backstory.</div>
+              <div class="example-card-footer">
+                <div class="card-tags"><span class="tag tag-writing">Writing</span></div>
+                <span class="priority-badge priority-low">low</span>
+              </div>
+            </div>
+            <div class="example-card">
+              <div class="example-card-bar" style="background:#C9922A"></div>
+              <div class="example-card-title">Ambient forest sound loop</div>
+              <div class="example-card-footer">
+                <div class="card-tags"><span class="tag tag-audio">Audio</span></div>
+                <span class="priority-badge priority-low">low</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- In Progress -->
+        <div class="example-col">
+          <div class="example-col-header">
+            <div class="col-dot" style="background:#4A7A8A"></div>
+            <span class="example-col-title">In Progress</span>
+          </div>
+          <div class="example-col-body">
+            <div class="example-card">
+              <div class="example-card-bar" style="background:#B85C38"></div>
+              <div style="font-size:10px;color:var(--ink-faint);margin-bottom:4px;">◈ Alpha Build</div>
+              <div class="example-card-title">Player movement controller</div>
+              <div class="example-card-note">Coyote time, jump buffer, wall slide. Feels smooth now.</div>
+              <div class="example-card-footer">
+                <div class="card-tags"><span class="tag tag-code">Code</span></div>
+                <span class="priority-badge priority-high">high</span>
+              </div>
+            </div>
+            <div class="example-card">
+              <div class="example-card-bar" style="background:#C9922A"></div>
+              <div style="font-size:10px;color:var(--ink-faint);margin-bottom:4px;">◈ Alpha Build</div>
+              <div class="example-card-title">Main theme music</div>
+              <div class="example-card-note">Acoustic guitar, 2min loop. Need to fix the loop point.</div>
+              <div class="example-card-footer">
+                <div class="card-tags"><span class="tag tag-audio">Audio</span></div>
+                <span class="priority-badge priority-medium">medium</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Needs Testing -->
+        <div class="example-col">
+          <div class="example-col-header">
+            <div class="col-dot" style="background:#7A4A72"></div>
+            <span class="example-col-title">Needs Testing</span>
+          </div>
+          <div class="example-col-body">
+            <div class="example-card">
+              <div class="example-card-bar" style="background:#B85C38"></div>
+              <div style="font-size:10px;color:var(--ink-faint);margin-bottom:4px;">◈ Alpha Build</div>
+              <div class="example-card-title">Collision detection edge cases</div>
+              <div class="example-card-note">Clipping through thin platforms at high speed. Needs testing on all platform sizes.</div>
+              <div class="example-card-footer">
+                <div class="card-tags"><span class="tag tag-code">Code</span></div>
+                <span class="priority-badge priority-high">high</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Done -->
+        <div class="example-col">
+          <div class="example-col-header">
+            <div class="col-dot" style="background:#5A7A4A"></div>
+            <span class="example-col-title">Done / Shipped</span>
+          </div>
+          <div class="example-col-body">
+            <div class="example-card">
+              <div class="example-card-bar" style="background:#5A7A4A"></div>
+              <div class="example-card-title">Project setup & folder structure</div>
+              <div class="example-card-footer">
+                <div class="card-tags"><span class="tag tag-code">Code</span></div>
+                <span class="priority-badge priority-low">low</span>
+              </div>
+            </div>
+            <div class="example-card">
+              <div class="example-card-bar" style="background:#5A7A4A"></div>
+              <div class="example-card-title">Player sprite — idle & walk</div>
+              <div class="example-card-note">32×32px, 4-frame walk cycle. Looks great!</div>
+              <div class="example-card-footer">
+                <div class="card-tags"><span class="tag tag-art">Art</span></div>
+                <span class="priority-badge priority-high">high</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      </div>
+    </div>
+
+    <hr class="example-divider">
+
+    <div style="text-align:center; padding: 1rem 0 0.5rem;">
+      <button class="btn-go-board" onclick="switchPage('board')">Go to my board →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Card Modal -->
+<div class="modal-overlay" id="cardModal">
+  <div class="modal">
+    <div class="modal-header">
+      <input class="modal-title-input" id="modalTitle" placeholder="Task title…">
+      <button class="modal-close" onclick="closeCardModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label>Notes</label>
+        <textarea id="modalNotes" placeholder="Describe this task, add links, ideas…"></textarea>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label>Priority</label>
+          <select id="modalPriority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Milestone</label>
+          <select id="modalMilestone">
+            <option value="">None</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Tags</label>
+        <div class="modal-tags" id="modalTagsContainer"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-delete" onclick="deleteCard()">Delete task</button>
+      <button class="btn-save-modal" onclick="saveCardModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Milestone Modal -->
+<div class="modal-overlay" id="milestoneModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <span style="font-family:'Lora',serif;font-size:16px;font-weight:600;">New Milestone</span>
+      <button class="modal-close" onclick="closeMilestoneModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label>Milestone name</label>
+        <input type="text" id="milestoneNameInput" placeholder="e.g. Alpha Build, Prototype v1…"
+          style="font-family:'DM Sans',sans-serif;font-size:13px;border:1px solid var(--parchment);border-radius:8px;padding:9px 12px;background:var(--cream);color:var(--ink);width:100%;outline:none;"
+          onkeydown="if(event.key==='Enter')saveMilestone()">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <span></span>
+      <button class="btn-save-modal" onclick="saveMilestone()">Create</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COLS = [
+  { id: 'backlog',     label: 'Backlog / Ideas', color: '#C9922A' },
+  { id: 'inprogress', label: 'In Progress',      color: '#4A7A8A' },
+  { id: 'testing',    label: 'Needs Testing',    color: '#7A4A72' },
+  { id: 'done',       label: 'Done / Shipped',   color: '#5A7A4A' },
+];
+
+const TAGS = ['Art','Code','Audio','Design','Writing'];
+const TAG_CLASSES = { Art:'tag-art', Code:'tag-code', Audio:'tag-audio', Design:'tag-design', Writing:'tag-writing' };
+const MODAL_TAG_STYLES = {
+  Art:     { bg:'#F5E6D3', color:'#7A4820', border:'#D4A882' },
+  Code:    { bg:'#D3E4F5', color:'#1E4D7A', border:'#82B4D4' },
+  Audio:   { bg:'#E8D3F5', color:'#5A207A', border:'#B882D4' },
+  Design:  { bg:'#D3F5E4', color:'#1A6640', border:'#82D4A8' },
+  Writing: { bg:'#F5D3D3', color:'#7A1E1E', border:'#D48282' },
+};
+const PRIORITY_COLORS = { high: '#B85C38', medium: '#C9922A', low: '#5A7A4A' };
+
+// Start blank — no sample cards or milestones
+let data = JSON.parse(localStorage.getItem('cozikan-v1') || 'null') || {
+  milestones: [],
+  cards: []
+};
+
+let dragCardId = null;
+let editingCardId = null;
+let activeFilter = '';
+
+function save() { localStorage.setItem('cozikan-v1', JSON.stringify(data)); }
+function genId() { return 'c' + Date.now() + Math.random().toString(36).slice(2,6); }
+function getCards(colId) {
+  return data.cards.filter(c => c.col === colId && (!activeFilter || c.milestone === activeFilter));
+}
+
+// ── PAGE SWITCHING ────────────────────────────────
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelector(`.nav-tab[onclick="switchPage('${name}')"]`).classList.add('active');
+  document.getElementById('boardControls').style.display = name === 'board' ? 'flex' : 'none';
+}
+
+// ── RENDER ────────────────────────────────────────
+function render() {
+  renderMilestoneSelects();
+  renderBoard();
+  renderStats();
+}
+
+function renderMilestoneSelects() {
+  ['milestoneFilter', 'modalMilestone'].forEach(id => {
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    sel.innerHTML = id === 'milestoneFilter'
+      ? '<option value="">All milestones</option>'
+      : '<option value="">None</option>';
+    data.milestones.forEach(m => {
+      const o = document.createElement('option');
+      o.value = m; o.textContent = m;
+      if (m === cur) o.selected = true;
+      sel.appendChild(o);
+    });
+  });
+}
+
+function renderBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  COLS.forEach(col => {
+    const cards = getCards(col.id);
+    const colEl = document.createElement('div');
+    colEl.className = 'column';
+    colEl.dataset.col = col.id;
+
+    const emptyHTML = cards.length === 0 ? `
+      <div class="empty-state">
+        <div class="empty-state-icon">✦</div>
+        <h3>Nothing here yet</h3>
+        <p>Press + to add your first task</p>
+      </div>` : '';
+
+    colEl.innerHTML = `
+      <div class="col-header">
+        <div class="col-title-row">
+          <div class="col-dot" style="background:${col.color}"></div>
+          <span class="col-title">${col.label}</span>
+          <span class="col-count">${cards.length}</span>
+        </div>
+        <button class="btn-col-add" onclick="showAddForm('${col.id}')">+</button>
+      </div>
+      <div class="col-body" id="body-${col.id}"
+           ondragover="onDragOver(event,'${col.id}')"
+           ondragleave="onDragLeave(event,'${col.id}')"
+           ondrop="onDrop(event,'${col.id}')">
+        ${emptyHTML}
+        ${cards.map(c => cardHTML(c)).join('')}
+        <div class="add-card-form" id="form-${col.id}">
+          <input type="text" placeholder="Task title…" id="form-title-${col.id}" onkeydown="if(event.key==='Enter')quickAdd('${col.id}')">
+          <div class="add-form-row">
+            <select id="form-priority-${col.id}">
+              <option value="low">Low priority</option>
+              <option value="medium" selected>Medium priority</option>
+              <option value="high">High priority</option>
+            </select>
+            <select id="form-milestone-${col.id}">
+              <option value="">No milestone</option>
+              ${data.milestones.map(m=>`<option value="${m}">${m}</option>`).join('')}
+            </select>
+          </div>
+          <div class="tag-checkboxes">
+            ${TAGS.map(t=>`<label class="tag-check"><input type="checkbox" value="${t}" id="form-tag-${col.id}-${t}"><span>${t}</span></label>`).join('')}
+          </div>
+          <div class="form-actions">
+            <button class="btn-save" onclick="quickAdd('${col.id}')">Add task</button>
+            <button class="btn-cancel" onclick="hideAddForm('${col.id}')">Cancel</button>
+          </div>
+        </div>
+      </div>
+    `;
+    board.appendChild(colEl);
+
+    colEl.querySelectorAll('.card').forEach(el => {
+      el.addEventListener('dragstart', e => onDragStart(e, el.dataset.id));
+      el.addEventListener('dragend', () => onDragEnd());
+    });
+  });
+}
+
+function cardHTML(c) {
+  const pColor = PRIORITY_COLORS[c.priority] || PRIORITY_COLORS.medium;
+  const tags = (c.tags||[]).map(t=>`<span class="tag ${TAG_CLASSES[t]||''}">${t}</span>`).join('');
+  const note = c.notes ? `<div class="card-note">${esc(c.notes)}</div>` : '';
+  const ms = c.milestone ? `<div class="card-milestone">◈ ${esc(c.milestone)}</div>` : '';
+  return `
+    <div class="card" data-id="${c.id}" draggable="true" onclick="openCardModal('${c.id}')">
+      <div class="card-priority-bar" style="background:${pColor}"></div>
+      ${ms}
+      <div class="card-top"><span class="card-title">${esc(c.title)}</span></div>
+      ${note}
+      <div class="card-footer">
+        <div class="card-tags">${tags}</div>
+        <span class="priority-badge priority-${c.priority}">${c.priority}</span>
+      </div>
+    </div>`;
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderStats() {
+  const total = data.cards.length;
+  const done = data.cards.filter(c=>c.col==='done').length;
+  const high = data.cards.filter(c=>c.priority==='high'&&c.col!=='done').length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('statsBar').innerHTML = total === 0
+    ? `<span class="stat">🍜 Welcome to Cozikan! Add your first milestone, then press + on any column to start.</span>`
+    : `<span class="stat"><span class="stat-dot" style="background:#5A7A4A"></span>${done}/${total} tasks complete (${pct}%)</span>
+       <span class="stat"><span class="stat-dot" style="background:#B85C38"></span>${high} high priority open</span>
+       <span class="stat">🔖 ${data.milestones.length} milestone${data.milestones.length!==1?'s':''}</span>`;
+}
+
+// ── ADD FORM ──────────────────────────────────────
+function showAddForm(colId) {
+  COLS.forEach(c => { const f = document.getElementById('form-'+c.id); if(f) f.classList.remove('visible'); });
+  const form = document.getElementById('form-'+colId);
+  if (form) { form.classList.add('visible'); document.getElementById('form-title-'+colId)?.focus(); }
+}
+
+function hideAddForm(colId) {
+  document.getElementById('form-'+colId)?.classList.remove('visible');
+}
+
+function quickAdd(colId) {
+  const titleEl = document.getElementById('form-title-'+colId);
+  const title = (titleEl?.value||'').trim();
+  if (!title) return;
+  const priority = document.getElementById('form-priority-'+colId)?.value||'medium';
+  const milestone = document.getElementById('form-milestone-'+colId)?.value||'';
+  const tags = TAGS.filter(t=>document.getElementById(`form-tag-${colId}-${t}`)?.checked);
+  data.cards.push({ id: genId(), col: colId, title, notes:'', priority, tags, milestone });
+  save(); hideAddForm(colId); render();
+}
+
+// ── CARD MODAL ────────────────────────────────────
+function openCardModal(cardId) {
+  const card = data.cards.find(c=>c.id===cardId);
+  if (!card) return;
+  editingCardId = cardId;
+  document.getElementById('modalTitle').value = card.title;
+  document.getElementById('modalNotes').value = card.notes||'';
+  document.getElementById('modalPriority').value = card.priority||'medium';
+  document.getElementById('modalMilestone').value = card.milestone||'';
+
+  const container = document.getElementById('modalTagsContainer');
+  container.innerHTML = '';
+  TAGS.forEach(t => {
+    const style = MODAL_TAG_STYLES[t];
+    const active = (card.tags||[]).includes(t);
+    const btn = document.createElement('button');
+    btn.className = 'modal-tag-toggle'+(active?' active':'');
+    btn.dataset.tag = t; btn.textContent = t;
+    btn.style.cssText = `background:${style.bg};color:${style.color};border-color:${active?style.border:'transparent'}`;
+    btn.onclick = () => { btn.classList.toggle('active'); btn.style.borderColor = btn.classList.contains('active')?style.border:'transparent'; };
+    container.appendChild(btn);
+  });
+
+  document.getElementById('cardModal').classList.add('open');
+  document.getElementById('modalTitle').focus();
+}
+
+function closeCardModal() { document.getElementById('cardModal').classList.remove('open'); editingCardId=null; }
+
+function saveCardModal() {
+  if (!editingCardId) return;
+  const card = data.cards.find(c=>c.id===editingCardId);
+  if (!card) return;
+  card.title = document.getElementById('modalTitle').value.trim()||card.title;
+  card.notes = document.getElementById('modalNotes').value;
+  card.priority = document.getElementById('modalPriority').value;
+  card.milestone = document.getElementById('modalMilestone').value;
+  card.tags = Array.from(document.getElementById('modalTagsContainer').querySelectorAll('.modal-tag-toggle.active')).map(b=>b.dataset.tag);
+  save(); closeCardModal(); render();
+}
+
+function deleteCard() {
+  if (!editingCardId) return;
+  if (!confirm('Delete this task?')) return;
+  data.cards = data.cards.filter(c=>c.id!==editingCardId);
+  save(); closeCardModal(); render();
+}
+
+// ── MILESTONES ────────────────────────────────────
+function openMilestoneModal() {
+  document.getElementById('milestoneNameInput').value='';
+  document.getElementById('milestoneModal').classList.add('open');
+  document.getElementById('milestoneNameInput').focus();
+}
+function closeMilestoneModal() { document.getElementById('milestoneModal').classList.remove('open'); }
+
+function saveMilestone() {
+  const name = document.getElementById('milestoneNameInput').value.trim();
+  if (!name||data.milestones.includes(name)) return;
+  data.milestones.push(name); save(); render(); closeMilestoneModal();
+}
+
+function filterByMilestone() {
+  activeFilter = document.getElementById('milestoneFilter').value; render();
+}
+
+// ── DRAG & DROP ───────────────────────────────────
+function onDragStart(e, cardId) {
+  dragCardId = cardId;
+  setTimeout(()=>{ document.querySelector(`[data-id="${cardId}"]`)?.classList.add('dragging'); },0);
+  e.dataTransfer.effectAllowed='move';
+}
+function onDragEnd() {
+  document.querySelectorAll('.card.dragging').forEach(el=>el.classList.remove('dragging'));
+  document.querySelectorAll('.col-body').forEach(el=>el.classList.remove('drag-over'));
+  dragCardId=null;
+}
+function onDragOver(e, colId) {
+  e.preventDefault();
+  document.querySelectorAll('.col-body').forEach(el=>el.classList.remove('drag-over'));
+  document.getElementById('body-'+colId)?.classList.add('drag-over');
+}
+function onDragLeave(e, colId) { document.getElementById('body-'+colId)?.classList.remove('drag-over'); }
+function onDrop(e, colId) {
+  e.preventDefault();
+  if (!dragCardId) return;
+  const card = data.cards.find(c=>c.id===dragCardId);
+  if (card) { card.col=colId; save(); render(); }
+  document.querySelectorAll('.col-body').forEach(el=>el.classList.remove('drag-over'));
+}
+
+// ── KEYBOARD ──────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') { closeCardModal(); closeMilestoneModal(); }
+  if ((e.metaKey||e.ctrlKey)&&e.key==='Enter'&&document.getElementById('cardModal').classList.contains('open')) saveCardModal();
+});
+
+document.getElementById('cardModal').addEventListener('click', e=>{ if(e.target===document.getElementById('cardModal')) closeCardModal(); });
+document.getElementById('milestoneModal').addEventListener('click', e=>{ if(e.target===document.getElementById('milestoneModal')) closeMilestoneModal(); });
+
+render();
+</script>
+</body>
+</html>
